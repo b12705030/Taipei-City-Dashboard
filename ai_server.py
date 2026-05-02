@@ -1,29 +1,20 @@
 """
-AI Assistant HTTP Server
-GET  /health          → 確認 server 存活
-POST /query           → 自然語言 → 組件路由
+AI Assistant HTTP Server — 純標準函式庫，不需要安裝任何套件
+GET  /health  → 確認 server 存活
+POST /query   → 自然語言 → 組件路由
+
+啟動：python ai_server.py
 """
 
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-import requests
 import json
-
-app = FastAPI()
-
-# 允許 localhost 任何 port 呼叫（Vue3 dev server 用）
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+import urllib.request
+import urllib.error
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
 # ── 台智雲設定 ──────────────────────────────────────────
 API_KEY  = "bf3c97af-ea08-4286-8dc3-9467fd216b9b"
 CONV_URL = "https://api-ams.twcc.ai/api/models/conversation"
-MODEL    = "llama3.3-ffm-70b-32k-chat"
+MODEL    = "llama3.3-ffm-70b-16k-chat"
 
 HEADERS = {
     "accept": "application/json",
@@ -128,7 +119,7 @@ SYSTEM_PROMPT = (
     "- 長照、高齡、老人、照服員、長期照護 → show_ltc_care（判斷是台北市還是雙北）\n"
     "- 圖資、地圖圖層、腳踏車道、人行道、自行車道、地理資料 → show_map_layers（判斷是台北市還是雙北）\n"
     "- 交通、公車、YouBike、電動巴士、自行車 → show_transportation\n"
-    "- 人口流動、日間人口、夜間人口、電信信令、活動人口、停留人口、行政區人口 → show_population_flow（判斷是台北市還是新北市）\n"
+    "- 人口流動、日間人口、夜間人口、電信信令、活動人口、停留人口、行政區人口 → show_population_flow（判斷是台北市還是雙北）\n"
     "- 等時圈、捷運步行、公車站可及、台鐵覆蓋、大眾運輸可及性、步行範圍 → show_transit_isochrone\n"
     "如果問題完全不相關，直接回覆無法找到對應組件，不要呼叫工具。\n"
     "城市判斷（show_ltc_care / show_map_layers）：提到新北、雙北、大台北 → metrotaipei；只提到台北市 → taipei；沒有特別說 → 預設 metrotaipei。\n"
@@ -136,58 +127,90 @@ SYSTEM_PROMPT = (
 )
 
 
-class QueryRequest(BaseModel):
-    text: str
-
-
-class QueryResponse(BaseModel):
-    action: str
-    params: dict
-
-
-@app.get("/health")
-def health():
-    return {"status": "ok"}
-
-
-@app.post("/query", response_model=QueryResponse)
-def query(req: QueryRequest):
-    if not req.text.strip():
-        raise HTTPException(status_code=400, detail="text is empty")
-
-    payload = {
+def call_llm(text: str) -> dict:
+    payload = json.dumps({
         "model": MODEL,
         "messages": [
             {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user",   "content": req.text},
+            {"role": "user",   "content": text},
         ],
         "tools": TOOLS,
         "parameters": PARAMETERS,
         "stream": False,
-    }
+    }).encode("utf-8")
 
-    try:
-        resp = requests.post(CONV_URL, headers=HEADERS, json=payload, timeout=30)
-        resp.raise_for_status()
-    except requests.HTTPError as e:
-        raise HTTPException(status_code=502, detail=f"台智雲 API 錯誤: {e.response.status_code}")
-    except requests.RequestException as e:
-        raise HTTPException(status_code=502, detail=f"連線失敗: {e}")
+    req = urllib.request.Request(CONV_URL, data=payload, headers=HEADERS, method="POST")
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        return json.loads(resp.read().decode("utf-8"))
 
-    data = resp.json()
-    tool_calls = data.get("tool_calls", [])
 
-    if tool_calls:
-        tc = tool_calls[0]
-        args_raw = tc["function"].get("arguments", "{}")
-        args = json.loads(args_raw) if isinstance(args_raw, str) else args_raw
-        return QueryResponse(action=tc["function"]["name"], params=args)
+class Handler(BaseHTTPRequestHandler):
+    def log_message(self, format, *args):
+        print(f"[{self.address_string()}] {format % args}")
 
-    # fallback
-    text = data.get("generated_text") or data.get("content", "")
-    return QueryResponse(action="show_text", params={"message": text})
+    def _send_json(self, code: int, body: dict):
+        data = json.dumps(body, ensure_ascii=False).encode("utf-8")
+        self.send_response(code)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(data)))
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.end_headers()
+        self.wfile.write(data)
+
+    def do_OPTIONS(self):
+        self.send_response(204)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.end_headers()
+
+    def do_GET(self):
+        if self.path == "/health":
+            self._send_json(200, {"status": "ok"})
+        else:
+            self._send_json(404, {"detail": "not found"})
+
+    def do_POST(self):
+        if self.path != "/query":
+            self._send_json(404, {"detail": "not found"})
+            return
+
+        length = int(self.headers.get("Content-Length", 0))
+        body = json.loads(self.rfile.read(length).decode("utf-8"))
+        text = body.get("text", "").strip()
+
+        if not text:
+            self._send_json(400, {"detail": "text is empty"})
+            return
+
+        try:
+            data = call_llm(text)
+        except urllib.error.HTTPError as e:
+            self._send_json(502, {"detail": f"台智雲 API 錯誤: {e.code}"})
+            return
+        except Exception as e:
+            self._send_json(502, {"detail": f"連線失敗: {e}"})
+            return
+
+        tool_calls = data.get("tool_calls", [])
+        if tool_calls:
+            tc = tool_calls[0]
+            args_raw = tc["function"].get("arguments", "{}")
+            args = json.loads(args_raw) if isinstance(args_raw, str) else args_raw
+            self._send_json(200, {"action": tc["function"]["name"], "params": args})
+        else:
+            msg = data.get("generated_text") or data.get("content", "")
+            self._send_json(200, {"action": "show_text", "params": {"message": msg}})
 
 
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8090)
+    PORT = 8090
+    server = HTTPServer(("0.0.0.0", PORT), Handler)
+    print(f"AI server running on http://0.0.0.0:{PORT}")
+    print("Press Ctrl+C to stop.")
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        print("\nStopped.")
