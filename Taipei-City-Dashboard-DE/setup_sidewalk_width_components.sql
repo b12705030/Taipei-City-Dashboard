@@ -70,33 +70,10 @@ ON CONFLICT (index) DO UPDATE SET
     types  = EXCLUDED.types;
 
 -- ── 3. component ──────────────────────────────────────────────
-INSERT INTO public.components (index, name, history_config, map_config_ids, map_filter, time_from, time_to, update_freq, update_freq_unit, source, short_desc, long_desc, use_case, links, contributors, created_at, updated_at, query_type, query_chart, query_history, city)
-VALUES (
-    'sidewalk_width',
-    '人行道寬度指標',
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    1,
-    'year',
-    '全國人行道資料（內政部）',
-    '依人行道寬度（SW_WTH）以 1.25m / 2.5m 為斷點分三色標示：紅（< 1.25m）、黃（1.25–2.5m）、綠（≥ 2.5m）',
-    NULL,
-    NULL,
-    NULL,
-    ARRAY['reneting'],
-    NOW(),
-    NOW(),
-    'map_legend',
-    NULL,
-    NULL,
-    NULL
-)
+INSERT INTO public.components (index, name)
+VALUES ('sidewalk_width', '人行道寬度指標')
 ON CONFLICT (index) DO UPDATE SET
     name       = EXCLUDED.name,
-    short_desc = EXCLUDED.short_desc,
     updated_at = NOW();
 
 -- ── 4. query_charts（台北市 & 雙北）──────────────────────────
@@ -105,10 +82,14 @@ DELETE FROM public.query_charts WHERE index = 'sidewalk_width';
 
 INSERT INTO public.query_charts
     (index, city, query_type, map_config_ids, created_at, updated_at,
-     time_from, time_to, update_freq, update_freq_unit, source, short_desc, long_desc)
+     time_from, time_to, update_freq, update_freq_unit, source, short_desc, long_desc, query_chart)
 VALUES
-    ('sidewalk_width', 'taipei',      'map_legend', ARRAY[108],     NOW(), NOW(), NULL, NULL, 1, 'year', '全國人行道資料（內政部）', '台北市人行道寬度指標', NULL),
-    ('sidewalk_width', 'metrotaipei', 'map_legend', ARRAY[108,109], NOW(), NOW(), NULL, NULL, 1, 'year', '全國人行道資料（內政部）', '雙北人行道寬度指標', NULL);
+    ('sidewalk_width', 'taipei',      'map_legend', ARRAY[108],     NOW(), NOW(), 'static', NULL, 1, 'year',
+     '全國人行道資料（內政部）', '台北市人行道寬度指標', NULL,
+     E'SELECT unnest(ARRAY[''< 1.25m（窄）'', ''1.25–2.5m（一般）'', ''≥ 2.5m（寬）'']) AS name, ''fill'' AS type'),
+    ('sidewalk_width', 'metrotaipei', 'map_legend', ARRAY[108,109], NOW(), NOW(), 'static', NULL, 1, 'year',
+     '全國人行道資料（內政部）', '雙北人行道寬度指標', NULL,
+     E'SELECT unnest(ARRAY[''< 1.25m（窄）'', ''1.25–2.5m（一般）'', ''≥ 2.5m（寬）'']) AS name, ''fill'' AS type');
 
 -- ── 5. 加入 map-layers 儀表板 ─────────────────────────────────
 -- 取得新 component id

@@ -69,6 +69,10 @@ const legendItems = computed(() => {
 	) {
 		return props.series; // map_legend format — use as-is
 	}
+	// Standard series format (three_d/two_d with data arrays) — use series names as legend
+	if (props.series.length > 0 && Array.isArray(props.series[0]?.data)) {
+		return props.series.map((s) => ({ name: s.name, type: "fill" }));
+	}
 	const circleColor = props.map_config?.[0]?.paint?.["circle-color"];
 	if (!Array.isArray(circleColor) || circleColor[0] !== "interpolate") return [];
 	const stops = [];

@@ -146,7 +146,11 @@ const chartOptions = ref({
 			: [],
 		labels: {
 			offsetY: 5,
+			rotate: 0,
+			rotateAlways: false,
 			formatter: function (value) {
+				const num = parseInt(value);
+				if (!isNaN(num)) return num % 3 === 0 ? String(num) : "";
 				return value.length > 7 ? value.slice(0, 6) + "..." : value;
 			},
 		},

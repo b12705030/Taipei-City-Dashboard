@@ -1,6 +1,6 @@
 # 行人安全 + 大眾運輸等時圈 + 人口流量 + 雙北人行道路網 — 環境設定指南
 
-> 適用分支：`develop`（或 `feature/transit-isochrone`）
+> 適用分支：`develop`
 > 前提：已完成官方 Docker 環境設定（能跑起來基本 Dashboard，`localhost` 有畫面）
 
 ---
@@ -9,10 +9,13 @@
 
 | 功能 | 說明 |
 |------|------|
-| 行人安全地圖 | 雙北行人事故熱區、時段分析、年度趨勢、高風險路口排名、AI 報告 |
+| 行人安全地圖 | 雙北行人事故熱區、時段分析、年度趨勢、高風險路口排名 |
+| 行人事故圓餅圖 | 天氣分布 & 事故類型細項（A2類事故統計） |
 | 大眾運輸步行等時圈 | 捷運／公車／台鐵站 5/10/15 分鐘步行覆蓋等時圈，可點圖例篩選，長條圖疊加顯示 |
 | 人口流量（電信信令） | 雙北各行政區平日日間／夜間活動人數及差異，可捲動長條圖 |
-| 雙北步行路網圖資 | 地圖交叉比對頁 → 圖資資訊，金黃色為人行道、咖啡色為巷弄道路；等時圈以實際路網計算（OSM Dijkstra） |
+| 雙北步行路網圖資 | 圖資資訊頁，金黃色為人行道、咖啡色為巷弄道路；等時圈以實際路網計算（OSM Dijkstra） |
+| 人行道寬度指標 | 各行政區人行道寬度分布（紅／黃／綠）100% 疊加長條圖 |
+| 最後一哩路儀表板 | 整合人口流量、等時圈、行人事故共 12 個組件的綜合儀表板 |
 
 ---
 
@@ -48,6 +51,24 @@ docker exec postgres-data psql -U postgres -d dashboard -f /tmp/pedestrian.sql
 ```powershell
 docker cp Taipei-City-Dashboard-DE/setup_pedestrian_components.sql postgres-manager:/tmp/setup_pedestrian.sql
 docker exec postgres-manager psql -U postgres -d dashboardmanager -f /tmp/setup_pedestrian.sql
+```
+
+---
+
+### 步驟三之一：設定行人事故圓餅圖（天氣 & 事故類型）
+
+> 需要 A2類事故 CSV（`data/NPA_TMA2_*.csv`），已隨 git 附上。
+
+```powershell
+pip install psycopg2-binary
+python Taipei-City-Dashboard-DE/etl_pedestrian_pie.py
+```
+
+成功會看到「完成！」並寫入 `ped_accident_weather_stats` / `ped_accident_subtype_stats`。
+
+```powershell
+docker cp Taipei-City-Dashboard-DE/setup_pedestrian_pie_components.sql postgres-manager:/tmp/setup_pie.sql
+docker exec postgres-manager psql -U postgres -d dashboardmanager -f /tmp/setup_pie.sql
 ```
 
 ---
@@ -109,7 +130,28 @@ docker exec postgres-manager psql -U postgres -d dashboardmanager -f /tmp/setup_
 
 ---
 
-### 步驟七：重啟後端與前端
+### 步驟七：設定人行道寬度組件
+
+```powershell
+docker cp Taipei-City-Dashboard-DE/setup_sidewalk_width_components.sql postgres-manager:/tmp/setup_sidewalk_width.sql
+docker exec postgres-manager psql -U postgres -d dashboardmanager -f /tmp/setup_sidewalk_width.sql
+```
+
+接著計算各行政區寬度分布統計（GeoJSON 已隨 git 附上）：
+
+```powershell
+python Taipei-City-Dashboard-DE/compute_sidewalk_stats.py
+```
+
+成功會看到：
+```
+共 41 個行政區，寫入 DB...
+完成！
+```
+
+---
+
+### 步驟八：重啟後端與前端
 
 ```powershell
 docker restart dashboard-be
@@ -137,6 +179,11 @@ git pull origin develop
 docker cp Taipei-City-Dashboard-DE/setup_pedestrian_components.sql postgres-manager:/tmp/setup_pedestrian.sql
 docker exec postgres-manager psql -U postgres -d dashboardmanager -f /tmp/setup_pedestrian.sql
 
+python Taipei-City-Dashboard-DE/etl_pedestrian_pie.py
+
+docker cp Taipei-City-Dashboard-DE/setup_pedestrian_pie_components.sql postgres-manager:/tmp/setup_pie.sql
+docker exec postgres-manager psql -U postgres -d dashboardmanager -f /tmp/setup_pie.sql
+
 docker cp Taipei-City-Dashboard-DE/setup_isochrone_components.sql postgres-manager:/tmp/setup_iso.sql
 docker exec postgres-manager psql -U postgres -d dashboardmanager -f /tmp/setup_iso.sql
 
@@ -145,6 +192,11 @@ docker exec postgres-manager psql -U postgres -d dashboardmanager -f /tmp/setup_
 
 docker cp Taipei-City-Dashboard-DE/setup_walkable_components.sql postgres-manager:/tmp/setup_walkable.sql
 docker exec postgres-manager psql -U postgres -d dashboardmanager -f /tmp/setup_walkable.sql
+
+docker cp Taipei-City-Dashboard-DE/setup_sidewalk_width_components.sql postgres-manager:/tmp/setup_sidewalk_width.sql
+docker exec postgres-manager psql -U postgres -d dashboardmanager -f /tmp/setup_sidewalk_width.sql
+
+python Taipei-City-Dashboard-DE/compute_sidewalk_stats.py
 
 docker restart dashboard-be
 docker restart dashboard-fe
@@ -161,7 +213,7 @@ docker restart dashboard-fe
 | 行人安全地圖 | `http://localhost/mapview?index=pedestrian-safety&city=metrotaipei` |
 | 大眾運輸等時圈（地圖） | `http://localhost/mapview?index=transit-isochrone&city=metrotaipei` |
 | 等時圈儀表板（圖表） | `http://localhost/dashboard?index=transit-isochrone&city=metrotaipei` |
-| 人口流量儀表板 | `http://localhost/dashboard?index=population-flow&city=metrotaipei` |
+| 最後一哩路儀表板 | `http://localhost/dashboard?index=last-mile&city=metrotaipei` |
 | 人行道路網圖資 | `http://localhost/mapview?index=map-layers-metrotaipei&city=metrotaipei` |
 
 ---
@@ -183,8 +235,15 @@ docker exec postgres-data psql -U postgres -d dashboard -c "SELECT COUNT(*) FROM
 # 步行路網組件
 docker exec postgres-manager psql -U postgres -d dashboardmanager -c "SELECT c.index, qc.city FROM public.components c JOIN public.query_charts qc ON c.index = qc.index WHERE c.index = 'walkable_osm_taipei' ORDER BY qc.city;"
 
+# 人行道寬度統計
+docker exec postgres-data psql -U postgres -d dashboard -c "SELECT COUNT(*) FROM public.sidewalk_width_stats;"
+
+# 行人事故圓餅圖統計
+docker exec postgres-data psql -U postgres -d dashboard -c "SELECT COUNT(*) FROM public.ped_accident_weather_stats;"
+docker exec postgres-data psql -U postgres -d dashboard -c "SELECT COUNT(*) FROM public.ped_accident_subtype_stats;"
+
 # component_charts 欄位確認（stacked / scrollable）
-docker exec postgres-manager psql -U postgres -d dashboardmanager -c "SELECT index, stacked, scrollable FROM public.component_charts WHERE index LIKE '%isochrone%' OR index LIKE '%population_flow%';"
+docker exec postgres-manager psql -U postgres -d dashboardmanager -c "SELECT index, stacked, scrollable FROM public.component_charts WHERE index LIKE '%isochrone%' OR index LIKE '%population_flow%' OR index = 'sidewalk_width';"
 ```
 
 預期結果：
@@ -194,7 +253,9 @@ docker exec postgres-manager psql -U postgres -d dashboardmanager -c "SELECT ind
 - `population_flow_daytime`：41 筆
 - `population_flow_nighttime`：41 筆
 - `walkable_osm_taipei`：應出現 2 列（metrotaipei 一個、taipei 一個）
-- 等時圈 `stacked = t`、人口流量 `scrollable = t`
+- `sidewalk_width_stats`：41 筆（雙北 41 個行政區）
+- `ped_accident_weather_stats`：7 筆、`ped_accident_subtype_stats`：18 筆
+- 等時圈 `stacked = t`、人口流量 `scrollable = t`、人行道寬度 `stacked = t`
 
 ---
 
@@ -229,6 +290,21 @@ docker exec postgres-manager psql -U postgres -d dashboardmanager -c "SELECT ind
 
 **Q：組件全部顯示問號（?????）或 400 錯誤？**
 - SQL 中文字元損毀（PowerShell 直接 `<` 重導向會亂碼），重新用 `docker cp` 方式重跑對應步驟
+
+**Q：跑 Python 腳本出現 `UnicodeDecodeError: 'cp950'`？**
+- Windows 預設編碼問題。在 PowerShell 執行前先設定：
+  ```powershell
+  $env:PYTHONUTF8 = "1"
+  python Taipei-City-Dashboard-DE/compute_sidewalk_stats.py
+  ```
+
+**Q：人行道寬度長條圖是空的？**
+- 確認有跑 `compute_sidewalk_stats.py`（需在步驟七之後）
+- 確認有重啟 `dashboard-be`
+
+**Q：行人事故圓餅圖是空的？**
+- 確認有跑 `etl_pedestrian_pie.py`（CSV 資料在 `data/NPA_TMA2_*.csv`）
+- 確認有跑 `setup_pedestrian_pie_components.sql`
 
 **Q：AI 分析按鈕沒有回應？**
 - 確認 `docker/.env` 裡有設定 `ANTHROPIC_API_KEY`

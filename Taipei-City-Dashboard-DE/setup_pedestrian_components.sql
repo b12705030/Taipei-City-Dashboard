@@ -223,7 +223,7 @@ INSERT INTO public.query_charts (
     NOW(),
     NOW(),
     'three_d',
-    E'SELECT\n    hour::text AS x_axis,\n    CASE EXTRACT(ISODOW FROM make_date(\n        GREATEST(year::int, 2022),\n        GREATEST(month::int, 1),\n        1\n    ))\n        WHEN 1 THEN ''週一''\n        WHEN 2 THEN ''週二''\n        WHEN 3 THEN ''週三''\n        WHEN 4 THEN ''週四''\n        WHEN 5 THEN ''週五''\n        WHEN 6 THEN ''週六''\n        WHEN 7 THEN ''週日''\n    END AS y_axis,\n    COUNT(*)::INT AS data\nFROM traffic_pedestrian_accident_taipei\nWHERE year >= 2022 AND hour IS NOT NULL AND month IS NOT NULL\nGROUP BY hour, y_axis\nORDER BY hour, y_axis',
+    E'SELECT x_axis, y_axis, data FROM (\n    SELECT\n        hour::text AS x_axis,\n        CASE EXTRACT(ISODOW FROM make_date(\n            GREATEST(year::int, 2022),\n            GREATEST(month::int, 1),\n            1\n        ))\n            WHEN 1 THEN ''週一''\n            WHEN 2 THEN ''週二''\n            WHEN 3 THEN ''週三''\n            WHEN 4 THEN ''週四''\n            WHEN 5 THEN ''週五''\n            WHEN 6 THEN ''週六''\n            WHEN 7 THEN ''週日''\n        END AS y_axis,\n        COUNT(*)::INT AS data\n    FROM traffic_pedestrian_accident_taipei\n    WHERE year >= 2022 AND hour IS NOT NULL AND month IS NOT NULL\n    GROUP BY hour, y_axis\n) sub\nORDER BY x_axis::int, CASE y_axis WHEN ''週一'' THEN 7 WHEN ''週二'' THEN 6 WHEN ''週三'' THEN 5 WHEN ''週四'' THEN 4 WHEN ''週五'' THEN 3 WHEN ''週六'' THEN 2 WHEN ''週日'' THEN 1 ELSE 0 END',
     NULL,
     'taipei'
 );
@@ -253,7 +253,7 @@ INSERT INTO public.query_charts (
     NOW(),
     NOW(),
     'three_d',
-    E'SELECT\n    hour::text AS x_axis,\n    CASE EXTRACT(ISODOW FROM make_date(\n        GREATEST(year::int, 2022),\n        GREATEST(month::int, 1),\n        1\n    ))\n        WHEN 1 THEN ''週一''\n        WHEN 2 THEN ''週二''\n        WHEN 3 THEN ''週三''\n        WHEN 4 THEN ''週四''\n        WHEN 5 THEN ''週五''\n        WHEN 6 THEN ''週六''\n        WHEN 7 THEN ''週日''\n    END AS y_axis,\n    COUNT(*)::INT AS data\nFROM (\n    SELECT hour, year, month FROM traffic_pedestrian_accident_taipei WHERE year >= 2022\n    UNION ALL\n    SELECT hour, year, month FROM traffic_pedestrian_accident_ntpc WHERE year >= 2022\n) combined\nWHERE hour IS NOT NULL AND month IS NOT NULL\nGROUP BY hour, y_axis\nORDER BY hour, y_axis',
+    E'SELECT x_axis, y_axis, data FROM (\n    SELECT\n        hour::text AS x_axis,\n        CASE EXTRACT(ISODOW FROM make_date(\n            GREATEST(year::int, 2022),\n            GREATEST(month::int, 1),\n            1\n        ))\n            WHEN 1 THEN ''週一''\n            WHEN 2 THEN ''週二''\n            WHEN 3 THEN ''週三''\n            WHEN 4 THEN ''週四''\n            WHEN 5 THEN ''週五''\n            WHEN 6 THEN ''週六''\n            WHEN 7 THEN ''週日''\n        END AS y_axis,\n        COUNT(*)::INT AS data\n    FROM (\n        SELECT hour, year, month FROM traffic_pedestrian_accident_taipei WHERE year >= 2022\n        UNION ALL\n        SELECT hour, year, month FROM traffic_pedestrian_accident_ntpc WHERE year >= 2022\n    ) combined\n    WHERE hour IS NOT NULL AND month IS NOT NULL\n    GROUP BY hour, y_axis\n) sub\nORDER BY x_axis::int, CASE y_axis WHEN ''週一'' THEN 7 WHEN ''週二'' THEN 6 WHEN ''週三'' THEN 5 WHEN ''週四'' THEN 4 WHEN ''週五'' THEN 3 WHEN ''週六'' THEN 2 WHEN ''週日'' THEN 1 ELSE 0 END',
     NULL,
     'metrotaipei'
 );
