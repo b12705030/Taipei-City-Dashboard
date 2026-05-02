@@ -1,0 +1,165 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "city": "台北市", "district": "萬華區", "total_length_m": 904941 },
+      "geometry": { "type": "Point", "coordinates": [121.4993, 25.0328] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "台北市", "district": "中山區", "total_length_m": 685379 },
+      "geometry": { "type": "Point", "coordinates": [121.5314, 25.0625] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "台北市", "district": "中正區", "total_length_m": 458565 },
+      "geometry": { "type": "Point", "coordinates": [121.5191, 25.0337] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "台北市", "district": "大安區", "total_length_m": 450703 },
+      "geometry": { "type": "Point", "coordinates": [121.5437, 25.0261] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "台北市", "district": "大同區", "total_length_m": 413031 },
+      "geometry": { "type": "Point", "coordinates": [121.5143, 25.0633] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "台北市", "district": "松山區", "total_length_m": 294446 },
+      "geometry": { "type": "Point", "coordinates": [121.5779, 25.0496] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "台北市", "district": "文山區", "total_length_m": 155283 },
+      "geometry": { "type": "Point", "coordinates": [121.5662, 24.9920] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "台北市", "district": "信義區", "total_length_m": 143781 },
+      "geometry": { "type": "Point", "coordinates": [121.5678, 25.0330] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "台北市", "district": "南港區", "total_length_m": 70696 },
+      "geometry": { "type": "Point", "coordinates": [121.6066, 25.0548] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "台北市", "district": "士林區", "total_length_m": 58245 },
+      "geometry": { "type": "Point", "coordinates": [121.5217, 25.0934] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "台北市", "district": "北投區", "total_length_m": 33334 },
+      "geometry": { "type": "Point", "coordinates": [121.5018, 25.1329] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "台北市", "district": "內湖區", "total_length_m": 30851 },
+      "geometry": { "type": "Point", "coordinates": [121.5906, 25.0832] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "新北市", "district": "板橋區", "total_length_m": 26793 },
+      "geometry": { "type": "Point", "coordinates": [121.4551, 24.9986] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "新北市", "district": "中和區", "total_length_m": 22196 },
+      "geometry": { "type": "Point", "coordinates": [121.4933, 24.9966] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "新北市", "district": "永和區", "total_length_m": 22035 },
+      "geometry": { "type": "Point", "coordinates": [121.5151, 24.9970] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "新北市", "district": "新莊區", "total_length_m": 18596 },
+      "geometry": { "type": "Point", "coordinates": [121.4516, 25.0439] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "新北市", "district": "新店區", "total_length_m": 12012 },
+      "geometry": { "type": "Point", "coordinates": [121.5364, 24.9678] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "新北市", "district": "三重區", "total_length_m": 12048 },
+      "geometry": { "type": "Point", "coordinates": [121.4871, 25.0671] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "新北市", "district": "土城區", "total_length_m": 10353 },
+      "geometry": { "type": "Point", "coordinates": [121.4385, 24.9713] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "新北市", "district": "蘆洲區", "total_length_m": 5545 },
+      "geometry": { "type": "Point", "coordinates": [121.4731, 25.0832] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "新北市", "district": "汐止區", "total_length_m": 5477 },
+      "geometry": { "type": "Point", "coordinates": [121.6599, 25.0671] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "新北市", "district": "深坑區", "total_length_m": 1061 },
+      "geometry": { "type": "Point", "coordinates": [121.6170, 24.9676] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "新北市", "district": "三峽區", "total_length_m": 1286 },
+      "geometry": { "type": "Point", "coordinates": [121.3663, 24.9299] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "新北市", "district": "淡水區", "total_length_m": 1000 },
+      "geometry": { "type": "Point", "coordinates": [121.4499, 25.1668] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "新北市", "district": "五股區", "total_length_m": 1310 },
+      "geometry": { "type": "Point", "coordinates": [121.4491, 25.0832] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "新北市", "district": "泰山區", "total_length_m": 988 },
+      "geometry": { "type": "Point", "coordinates": [121.4266, 25.0531] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "新北市", "district": "樹林區", "total_length_m": 1926 },
+      "geometry": { "type": "Point", "coordinates": [121.4178, 24.9897] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "新北市", "district": "鶯歌區", "total_length_m": 857 },
+      "geometry": { "type": "Point", "coordinates": [121.3506, 24.9528] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "新北市", "district": "瑞芳區", "total_length_m": 491 },
+      "geometry": { "type": "Point", "coordinates": [121.8166, 25.1095] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "新北市", "district": "貢寮區", "total_length_m": 332 },
+      "geometry": { "type": "Point", "coordinates": [121.9002, 25.0295] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "新北市", "district": "八里區", "total_length_m": 231 },
+      "geometry": { "type": "Point", "coordinates": [121.3972, 25.1497] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "新北市", "district": "林口區", "total_length_m": 0 },
+      "geometry": { "type": "Point", "coordinates": [121.3929, 25.0832] }
+    }
+  ]
+}

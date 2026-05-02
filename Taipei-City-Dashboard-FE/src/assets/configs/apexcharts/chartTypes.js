@@ -17,7 +17,7 @@ export const chartTypes = {
 	IconPercentChart: "圖示比例圖",
 	SpeedometerChart: "儀表板圖",
 	IndicatorChart: "指標圖",
-	MapLegend: "地圖圖例",
+	MapLegend: "圖例",
 	TextUnitChart: "文字單位圖",
 };
 
@@ -31,6 +31,7 @@ export const chartsPerDataType = {
 		"RadarChart",
 		"PolarAreaChart",
 		"MetroChart",
+		"MapLegend",
 	],
 	three_d: [
 		"ColumnChart",
