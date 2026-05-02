@@ -38,10 +38,12 @@ export const useChatStore = defineStore('chat', () => {
   	};
 
 	const actionLabels = {
-		show_accident_heatmap: '行人事故熱點地圖',
-		show_ltc_care:         '長照關懷儀表板',
-		show_map_layers:       '圖資資訊地圖',
-		show_transportation:   '務實交通儀表板',
+		show_accident_heatmap:  '行人事故熱點地圖',
+		show_ltc_care:          '長照關懷儀表板',
+		show_map_layers:        '圖資資訊地圖',
+		show_transportation:    '務實交通儀表板',
+		show_population_flow:   '人口流動儀表板',
+		show_transit_isochrone: '大眾運輸等時圈地圖',
 	}
 
 	const describeResult = (action, params) => {
@@ -50,6 +52,8 @@ export const useChatStore = defineStore('chat', () => {
 		if (action === 'show_ltc_care') return `${cityLabel} 長照關懷`
 		if (action === 'show_map_layers') return `${cityLabel} 圖資資訊`
 		if (action === 'show_transportation') return '雙北務實交通'
+		if (action === 'show_population_flow') return `${cityLabel} 人口流動`
+		if (action === 'show_transit_isochrone') return '雙北大眾運輸步行等時圈'
 		return null
 	}
 
@@ -69,14 +73,21 @@ export const useChatStore = defineStore('chat', () => {
 				const label = actionLabels[action] || action
 				const desc = describeResult(action, params)
 				const hasCityChoice = ['show_ltc_care', 'show_map_layers'].includes(action)
+				const hasPopFlowChoice = action === 'show_population_flow'
 				const buttons = hasCityChoice
 					? [
 						{ id: 1, text: `查看台北市${label}`, city: 'taipei' },
 						{ id: 2, text: `查看雙北${label}`,   city: 'metrotaipei' },
 					  ]
+					: hasPopFlowChoice
+					? [
+						{ id: 1, text: `查看台北市${label}`, city: 'taipei' },
+						{ id: 2, text: `查看雙北${label}`,   city: 'metrotaipei' },
+					  ]
 					: [{ id: 1, text: `查看${label}` }]
+				const needsChoice = hasCityChoice || hasPopFlowChoice
 				chatData.value.push({ id: chatData.value.length + 1, role: 'bot', isDefault: false,
-					content: `已為您找到對應組件：\n\n📍 ${label}${hasCityChoice ? '\n請選擇地區：' : (desc ? '\n條件：' + desc : '')}`,
+					content: `已為您找到對應組件：\n\n📍 ${label}${needsChoice ? '\n請選擇地區：' : (desc ? '\n條件：' + desc : '')}`,
 					action, params,
 					button: buttons,
 				})

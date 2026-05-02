@@ -1,0 +1,65 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "city": "台北市", "district": "萬華區", "total_length_m": 904941 },
+      "geometry": { "type": "Point", "coordinates": [121.4993, 25.0328] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "台北市", "district": "中山區", "total_length_m": 685379 },
+      "geometry": { "type": "Point", "coordinates": [121.5314, 25.0625] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "台北市", "district": "中正區", "total_length_m": 458565 },
+      "geometry": { "type": "Point", "coordinates": [121.5191, 25.0337] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "台北市", "district": "大安區", "total_length_m": 450703 },
+      "geometry": { "type": "Point", "coordinates": [121.5437, 25.0261] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "台北市", "district": "大同區", "total_length_m": 413031 },
+      "geometry": { "type": "Point", "coordinates": [121.5143, 25.0633] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "台北市", "district": "松山區", "total_length_m": 294446 },
+      "geometry": { "type": "Point", "coordinates": [121.5779, 25.0496] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "台北市", "district": "文山區", "total_length_m": 155283 },
+      "geometry": { "type": "Point", "coordinates": [121.5662, 24.9920] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "台北市", "district": "信義區", "total_length_m": 143781 },
+      "geometry": { "type": "Point", "coordinates": [121.5678, 25.0330] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "台北市", "district": "南港區", "total_length_m": 70696 },
+      "geometry": { "type": "Point", "coordinates": [121.6066, 25.0548] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "台北市", "district": "士林區", "total_length_m": 58245 },
+      "geometry": { "type": "Point", "coordinates": [121.5217, 25.0934] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "台北市", "district": "北投區", "total_length_m": 33334 },
+      "geometry": { "type": "Point", "coordinates": [121.5018, 25.1329] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "city": "台北市", "district": "內湖區", "total_length_m": 30851 },
+      "geometry": { "type": "Point", "coordinates": [121.5906, 25.0832] }
+    }
+  ]
+}

@@ -38,6 +38,10 @@ const resolveRoute = (action, params) => {
 		return { path: "/mapview", query: { index: city === 'taipei' ? 'map-layers-taipei' : 'map-layers-metrotaipei', city } }
 	if (action === 'show_transportation')
 		return { path: "/dashboard", query: { index: "practical_transportation_newtpe", city: "metrotaipei" } }
+	if (action === 'show_population_flow')
+		return { path: "/dashboard", query: { index: city === 'taipei' ? 'population_flow_tpe' : 'population_flow_newtpe', city } }
+	if (action === 'show_transit_isochrone')
+		return { path: "/mapview", query: { index: "transit-isochrone", city: "metrotaipei" } }
 	return null
 }
 

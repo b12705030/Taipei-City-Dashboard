@@ -30,7 +30,9 @@ def _load_env(path):
 
 _ENV_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "docker", ".env")
 _ENV = _load_env(_ENV_PATH)
-DB_PASSWORD = _ENV.get("DB_DASHBOARD_PASSWORD", "postgres")
+DB_PASSWORD = os.environ.get("DB_DASHBOARD_PASSWORD") or _ENV.get("DB_DASHBOARD_PASSWORD", "postgres")
+DB_HOST     = os.environ.get("DB_HOST", "localhost")
+DB_PORT     = int(os.environ.get("DB_PORT", "5433"))
 
 # ── 路徑設定 ──────────────────────────────────────────────────
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -61,7 +63,7 @@ def load_districts():
         else:
             newtaipei.append(entry)
     print(f"  台北: {len(taipei)} 區，新北: {len(newtaipei)} 區")
-    return {"taipei": taipei, "newtaipei": newtaipei}
+    return {"taipei": taipei, "newtaipei": newtaipei, "metrotaipei": taipei + newtaipei}
 
 
 def load_isochrone_by_time(path):
@@ -81,9 +83,11 @@ TRANSPORT_CONFIGS = [
     ("tra", "台鐵"),
 ]
 
+# city_key → (display_name, geojson_suffix)
+# metrotaipei GeoJSON 的檔名不帶城市後綴（直接是 isochrone_xxx_walk.geojson）
 CITY_MAP = {
-    "taipei":    "台北",
-    "newtaipei": "新北",
+    "taipei":      ("台北", "taipei"),
+    "metrotaipei": ("雙北", ""),
 }
 
 
@@ -124,9 +128,10 @@ def main():
 
     for transport_type, transport_name in TRANSPORT_CONFIGS:
         print(f"\n=== {transport_name} ===")
-        for city_key, city_name in CITY_MAP.items():
+        for city_key, (city_name, geojson_suffix) in CITY_MAP.items():
+            suffix_part = f"_{geojson_suffix}" if geojson_suffix else ""
             geojson_path = os.path.join(
-                MAPDATA_DIR, f"isochrone_{transport_type}_walk_{city_key}.geojson"
+                MAPDATA_DIR, f"isochrone_{transport_type}_walk{suffix_part}.geojson"
             )
             if not os.path.exists(geojson_path):
                 print(f"  [{city_name}] 找不到 {geojson_path}，跳過")
@@ -154,7 +159,7 @@ def main():
     print(f"\n共 {len(rows)} 筆，寫入 DB...")
 
     conn = psycopg2.connect(
-        host="localhost", port=5433,
+        host=DB_HOST, port=DB_PORT,
         dbname="dashboard", user="postgres", password=DB_PASSWORD
     )
     cur = conn.cursor()

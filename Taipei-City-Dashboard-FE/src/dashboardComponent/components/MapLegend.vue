@@ -1,7 +1,7 @@
 <!-- Developed by Taipei Urban Intelligence Center 2023-2024-->
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import bus from "../assets/map/bus.png";
 import metro from "../assets/map/metro.png";
 import triangle_green from "../assets/map/triangle_green.png";
@@ -59,6 +59,36 @@ function returnIcon(name) {
 	}
 }
 
+// When query_type is 'two_d', series contains district data — not legend items.
+// In that case, build legend entries from the map layer's circle-color paint stops.
+const legendItems = computed(() => {
+	if (
+		props.series.length > 0 &&
+		props.series[0]?.name !== undefined &&
+		!Array.isArray(props.series[0]?.data)
+	) {
+		return props.series; // map_legend format — use as-is
+	}
+	const circleColor = props.map_config?.[0]?.paint?.["circle-color"];
+	if (!Array.isArray(circleColor) || circleColor[0] !== "interpolate") return [];
+	const stops = [];
+	for (let i = 3; i + 1 < circleColor.length; i += 2) {
+		stops.push({ value: circleColor[i], color: circleColor[i + 1] });
+	}
+	return stops.map((stop, idx) => {
+		const next = stops[idx + 1];
+		let name;
+		if (idx === 0) {
+			name = next ? `< ${next.value.toLocaleString()} 公尺` : `${stop.value.toLocaleString()} 公尺`;
+		} else if (idx === stops.length - 1) {
+			name = `≥ ${stop.value.toLocaleString()} 公尺`;
+		} else {
+			name = `${stop.value.toLocaleString()} – ${next.value.toLocaleString()} 公尺`;
+		}
+		return { name, type: "circle", value: null, _color: stop.color };
+	});
+});
+
 const selectedIndex = ref(null);
 
 function handleDataSelection(index) {
@@ -99,7 +129,7 @@ function handleDataSelection(index) {
   >
     <div class="maplegend-legend">
       <button
-        v-for="(item, index) in series"
+        v-for="(item, index) in legendItems"
         :key="item.name"
         :class="{
           'maplegend-legend-item': true,
@@ -113,7 +143,7 @@ function handleDataSelection(index) {
         <div
           v-if="item.type !== 'symbol'"
           :style="{
-            backgroundColor: `${chart_config.color[index]}`,
+            backgroundColor: item._color || `${chart_config.color[index]}`,
             height: item.type === 'line' ? '0.4rem' : '1rem',
             borderRadius: item.type === 'circle' ? '50%' : '2px',
           }"
