@@ -20,7 +20,7 @@ ON CONFLICT (index) DO UPDATE SET name = EXCLUDED.name;
 
 INSERT INTO public.component_charts (index, color, types, unit) VALUES
     ('traffic_pedestrian_heatmap',
-        ARRAY['#FFF9C4', '#FFB300', '#E65100', '#B71C1C'],
+        ARRAY['#E53935', '#FFB300', '#E65100', '#B71C1C'],
         ARRAY['DistrictChart'],
         '件'),
     ('traffic_pedestrian_hourly_taipei',
@@ -120,7 +120,7 @@ ON CONFLICT (index) DO UPDATE
 -- 清除所有舊的 pedestrian query_charts（確保重跑時能正確更新）
 DELETE FROM public.query_charts WHERE index LIKE 'traffic_pedestrian%';
 
--- C1：台北市行人事故熱區地圖 (taipei)
+-- C1：台北市行人事故熱區地圖 (taipei) — 使用台北專屬 geojson，切換時只顯示台北點
 INSERT INTO public.query_charts (
     index, history_config, map_config_ids, map_filter,
     time_from, time_to, update_freq, update_freq_unit,
@@ -130,7 +130,7 @@ INSERT INTO public.query_charts (
 ) VALUES (
     'traffic_pedestrian_heatmap',
     NULL,
-    (SELECT ARRAY[id] FROM public.component_maps WHERE index = 'traffic_pedestrian_heatmap' LIMIT 1),
+    (SELECT ARRAY[id] FROM public.component_maps WHERE index = 'traffic_pedestrian_heatmap_taipei' LIMIT 1),
     '{}',
     '2022-01-01', 'now', 1, 'year',
     '警察局交通大隊、內政部警政署',
@@ -171,29 +171,6 @@ INSERT INTO public.query_charts (
     NULL,
     'metrotaipei'
 );
-
--- C1-taipei：臺北市版本（下拉選單用）
-INSERT INTO public.query_charts (
-    index, history_config, map_config_ids, map_filter,
-    time_from, time_to, update_freq, update_freq_unit,
-    source, short_desc, long_desc, use_case,
-    links, contributors, created_at, updated_at,
-    query_type, query_chart, query_history, city
-)
-SELECT
-    index, history_config,
-    (SELECT ARRAY[id] FROM public.component_maps WHERE index = 'traffic_pedestrian_heatmap_taipei' LIMIT 1),
-    map_filter,
-    time_from, time_to, update_freq, update_freq_unit,
-    source, short_desc, long_desc, use_case,
-    links, contributors, NOW(), NOW(),
-    'two_d',
-    E'SELECT district_name AS x_axis, SUM(accident_count)::INT AS data\nFROM traffic_pedestrian_district_stats\nWHERE city_name = ''臺北市''\nGROUP BY district_name\nORDER BY x_axis',
-    NULL,
-    'taipei'
-FROM public.query_charts
-WHERE index = 'traffic_pedestrian_heatmap' AND city = 'metrotaipei'
-ON CONFLICT DO NOTHING;
 
 -- C2：雙北行人事故時段分析（三個 city 版本，對應後端 query_charts.city 篩選）
 
