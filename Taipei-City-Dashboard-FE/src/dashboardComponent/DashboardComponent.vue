@@ -99,11 +99,12 @@ const emits = defineEmits([
 const displayTypes = computed(() => {
 	const types = props.config.chart_config.types;
 	if (!types.includes('MapLegend')) return types;
-	if (props.mode.includes('map')) {
-		return ['MapLegend', ...types.filter(t => t !== 'MapLegend')];
-	} else {
-		return [...types.filter(t => t !== 'MapLegend'), 'MapLegend'];
+	// In map mode, keep MapLegend first only if it was explicitly placed first in the DB types array.
+	// Otherwise (e.g. arcade where DistrictChart should be the default), always push MapLegend to the end.
+	if (props.mode.includes('map') && types[0] === 'MapLegend') {
+		return types;
 	}
+	return [...types.filter(t => t !== 'MapLegend'), 'MapLegend'];
 });
 
 const activeChart = ref(displayTypes.value[0]);

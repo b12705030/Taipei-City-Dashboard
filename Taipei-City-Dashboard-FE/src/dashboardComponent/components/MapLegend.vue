@@ -69,8 +69,9 @@ const legendItems = computed(() => {
 	) {
 		return props.series; // map_legend format — use as-is
 	}
-	// Standard series format (three_d/two_d with data arrays) — use series names as legend
-	if (props.series.length > 0 && Array.isArray(props.series[0]?.data)) {
+	// three_d format: multiple named series, each with a data array — use series names as legend items.
+	// single-series two_d is intentionally excluded (falls through to circle-color parser below).
+	if (props.series.length > 1 && Array.isArray(props.series[0]?.data)) {
 		return props.series.map((s) => ({ name: s.name, type: "fill" }));
 	}
 	const circleColor = props.map_config?.[0]?.paint?.["circle-color"];

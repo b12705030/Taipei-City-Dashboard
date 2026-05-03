@@ -319,8 +319,10 @@ function handleDataSelection(index) {
     class="districtchart"
   >
     <div class="districtchart-title">
-      <h5>{{ chart_config.unit === '%' ? '平均' : '總合' }}</h5>
-      <h6>{{ chart_config.unit === '%' ? Math.round(districtData.sum / (chart_config.categories?.length || 1)) : districtData.sum }} {{ chart_config.unit }}</h6>
+      <template v-if="chart_config.unit !== '%'">
+        <h5>總合</h5>
+        <h6>{{ districtData.sum }} {{ chart_config.unit }}</h6>
+      </template>
       <div
         v-if="!isDiffMode"
         class="districtchart-title-legend"
