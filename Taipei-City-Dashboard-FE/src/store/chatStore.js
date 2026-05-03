@@ -43,7 +43,9 @@ export const useChatStore = defineStore('chat', () => {
 		show_map_layers:        '圖資資訊地圖',
 		show_transportation:    '務實交通儀表板',
 		show_population_flow:   '人口流動儀表板',
-		show_transit_isochrone: '大眾運輸等時圈地圖',
+		show_isochrone_bus:     '公車站步行等時圈',
+		show_isochrone_mrt:     '捷運站步行等時圈',
+		show_isochrone_tra:     '台鐵站步行等時圈',
 	}
 
 	const describeResult = (action, params) => {
@@ -53,7 +55,9 @@ export const useChatStore = defineStore('chat', () => {
 		if (action === 'show_map_layers') return `${cityLabel} 圖資資訊`
 		if (action === 'show_transportation') return '雙北務實交通'
 		if (action === 'show_population_flow') return `${cityLabel} 人口流動`
-		if (action === 'show_transit_isochrone') return '雙北大眾運輸步行等時圈'
+		if (action === 'show_isochrone_bus') return `${cityLabel} 公車站 5/10/15 分鐘步行覆蓋等時圈`
+		if (action === 'show_isochrone_mrt') return `${cityLabel} 捷運站 5/10/15 分鐘步行覆蓋等時圈`
+		if (action === 'show_isochrone_tra') return `${cityLabel} 台鐵站 5/10/15 分鐘步行覆蓋等時圈`
 		return null
 	}
 
@@ -72,7 +76,7 @@ export const useChatStore = defineStore('chat', () => {
 			if (action && action !== 'show_text') {
 				const label = actionLabels[action] || action
 				const desc = describeResult(action, params)
-				const hasCityChoice = ['show_ltc_care', 'show_map_layers'].includes(action)
+				const hasCityChoice = ['show_ltc_care', 'show_map_layers', 'show_isochrone_bus', 'show_isochrone_mrt', 'show_isochrone_tra'].includes(action)
 				const hasPopFlowChoice = action === 'show_population_flow'
 				const buttons = hasCityChoice
 					? [

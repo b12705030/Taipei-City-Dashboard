@@ -101,12 +101,60 @@ TOOLS = [
     {
         "type": "function",
         "function": {
-            "name": "show_transit_isochrone",
-            "description": "顯示大眾運輸步行等時圈地圖，包含捷運站、公車站、台鐵站的步行可及範圍覆蓋率分析",
+            "name": "show_isochrone_bus",
+            "description": (
+                "顯示公車站步行覆蓋等時圈地圖組件（component index: transit_isochrone_bus）。"
+                "以雙北共 10,882 個（台北市 3,396 個）公車站為基礎，計算 5/10/15 分鐘步行可及範圍（400/800/1200 公尺）。"
+                "評估各區公車服務的步行可及性，識別覆蓋不足地區，輔助公車路線調整或新設站決策。"
+                "資料來源：台北市公共運輸處、新北市交通局。"
+            ),
             "parameters": {
                 "type": "object",
-                "properties": {},
-                "required": []
+                "properties": {
+                    "city": {"type": "string", "enum": ["taipei", "metrotaipei"],
+                             "description": "使用者明確說「台北市」才填 taipei，其餘（雙北、新北、或未指定）一律填 metrotaipei"}
+                },
+                "required": ["city"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "show_isochrone_mrt",
+            "description": (
+                "顯示捷運站步行覆蓋等時圈地圖組件（component index: transit_isochrone_mrt）。"
+                "以雙北共 132 個捷運站（含環狀線）或台北市境內 75 個捷運站為基礎，計算 5/10/15 分鐘步行可及範圍。"
+                "評估捷運服務覆蓋率，識別捷運沙漠，輔助都市發展或最後一哩路解決方案規劃。"
+                "資料來源：台北捷運公司（TRTC）、新北捷運公司（NTMC）、TDX 交通資料平台。"
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "city": {"type": "string", "enum": ["taipei", "metrotaipei"],
+                             "description": "使用者明確說「台北市」才填 taipei，其餘（雙北、新北、或未指定）一律填 metrotaipei"}
+                },
+                "required": ["city"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "show_isochrone_tra",
+            "description": (
+                "顯示台鐵站步行覆蓋等時圈地圖組件（component index: transit_isochrone_tra）。"
+                "以雙北共 14 個台鐵站（台北市境內 4 個：南港、松山、台北、萬華）為基礎，計算 5/10/15 分鐘步行可及範圍。"
+                "評估台鐵車站對周邊社區的服務覆蓋，辨識與捷運系統的互補關係，比較東西走廊台鐵服務效益。"
+                "資料來源：台灣鐵路管理局（TRA）。"
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "city": {"type": "string", "enum": ["taipei", "metrotaipei"],
+                             "description": "使用者明確說「台北市」才填 taipei，其餘（雙北、新北、或未指定）一律填 metrotaipei"}
+                },
+                "required": ["city"]
             }
         }
     }
@@ -120,10 +168,12 @@ SYSTEM_PROMPT = (
     "- 圖資、地圖圖層、腳踏車道、人行道、自行車道、地理資料 → show_map_layers（判斷是台北市還是雙北）\n"
     "- 交通、公車、YouBike、電動巴士、自行車 → show_transportation\n"
     "- 人口流動、日間人口、夜間人口、電信信令、活動人口、停留人口、行政區人口 → show_population_flow（判斷是台北市還是雙北）\n"
-    "- 等時圈、捷運步行、公車站可及、台鐵覆蓋、大眾運輸可及性、步行範圍 → show_transit_isochrone\n"
+    "- 公車站等時圈、公車步行可及、公車覆蓋範圍、公車站距離 → show_isochrone_bus（判斷是台北市還是雙北）\n"
+    "- 捷運等時圈、捷運步行可及、捷運覆蓋範圍、捷運沙漠、捷運站距離、最後一哩路 → show_isochrone_mrt（判斷是台北市還是雙北）\n"
+    "- 台鐵等時圈、台鐵步行可及、台鐵覆蓋範圍、火車站距離、台鐵站步行 → show_isochrone_tra（判斷是台北市還是雙北）\n"
+    "- 大眾運輸等時圈（未指定交通工具）、步行範圍、大眾運輸可及性 → 優先使用 show_isochrone_mrt\n"
     "如果問題完全不相關，直接回覆無法找到對應組件，不要呼叫工具。\n"
-    "城市判斷（show_ltc_care / show_map_layers）：提到新北、雙北、大台北 → metrotaipei；只提到台北市 → taipei；沒有特別說 → 預設 metrotaipei。\n"
-    "城市判斷（show_population_flow）：提到新北、雙北、大台北 → metrotaipei；只提到台北市 → taipei；沒有特別說 → 預設 metrotaipei。"
+    "城市判斷（適用所有帶 city 參數的工具）：提到新北、雙北、大台北 → metrotaipei；只提到台北市 → taipei；沒有特別說 → 預設 metrotaipei。"
 )
 
 
